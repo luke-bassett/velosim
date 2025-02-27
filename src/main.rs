@@ -1,7 +1,7 @@
-use std::ops::Mul;
+use std::f64::EPSILON;
 use std::ops::Add;
-use std::ops::Sub;
-use std::f64::EPSILON; // very small number
+use std::ops::Mul;
+use std::ops::Sub; // very small number
 
 /// Density of air at sea level [kg / m^3].
 const DENSITY_OF_AIR_AT_SEA_LEVEL: f64 = 1.225; // kg/m^3
@@ -38,7 +38,8 @@ impl Velocity {
     /// unit vector (direction) of velocity
     fn unit(&self) -> Velocity {
         let mag = self.magnitude();
-        if mag < EPSILON { // Avoid divid-by-zero or floating point errors
+        if mag < EPSILON {
+            // Avoid divid-by-zero or floating point errors
             Velocity { x: 0.0, y: 0.0 }
         } else {
             Velocity {
@@ -106,7 +107,10 @@ impl Rider {
     fn calculate_force_rider(&self) -> Force {
         let min_velocity: f64 = 1.0;
         let v_x = self.velocity.x.max(min_velocity);
-        Force { x: self.power / v_x, y: 0.0}
+        Force {
+            x: self.power / v_x,
+            y: 0.0,
+        }
     }
 
     fn update_velocity(&mut self, dt: f64, wind: &Wind) {
@@ -135,7 +139,7 @@ fn main() {
     }];
     let dt: f64 = 1.0; // seconds
     let wind = Wind {
-        velocity: Velocity { x: -5.0, y: 0.0 },
+        velocity: Velocity { x: -5.0, y: 1.0 },
     };
 
     for t in 0..100 {
@@ -145,8 +149,11 @@ fn main() {
         }
         for rider in &riders {
             println!(
-                "t {:<5} | v {:>8.2}",
-                t, rider.velocity.magnitude()
+                "t {:<5} | vx {:>8.2} | vy {:>8.2} | v {:>8.2}",
+                t,
+                rider.velocity.x,
+                rider.velocity.y,
+                rider.velocity.magnitude()
             )
         }
     }
