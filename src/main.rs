@@ -1,5 +1,6 @@
 use std::ops::Mul;
 use std::ops::Add;
+use std::ops::Sub;
 use std::f64::EPSILON; // very small number
 
 /// Density of air at sea level [kg / m^3].
@@ -15,10 +16,15 @@ struct Rider {
     cda: f64,           // m^2
     mass: f64,          // kg
 }
+struct Wind {
+    velocity: Velocity, // m/s in x and y
+}
 struct Position {
     x: f64,
     y: f64,
 }
+
+#[derive(Copy, Clone)]
 struct Velocity {
     x: f64,
     y: f64,
@@ -70,11 +76,23 @@ impl Add<Force> for Force {
     }
 }
 
+impl Sub<Velocity> for Velocity {
+    type Output = Velocity;
+
+    fn sub(self, other: Velocity) -> Velocity {
+        Velocity {
+            x: self.x - other.x,
+            y: self.y - other.y,
+        }
+    }
+}
+
 impl Rider {
-    fn calculate_force_drag(&self) -> Force {
-        let vel_mag = self.velocity.magnitude();
+    fn calculate_force_drag(&self, wind: &Wind) -> Force {
+        let velocity_relative_to_air = self.velocity - wind.velocity;
+        let vel_mag = velocity_relative_to_air.magnitude();
         let drag_mag = 0.5 * self.cda * DENSITY_OF_AIR_AT_SEA_LEVEL * vel_mag.powi(2);
-        let direction = self.velocity.unit();
+        let direction = velocity_relative_to_air.unit();
         Force {
             x: -1.0 * drag_mag * direction.x,
             y: -1.0 * drag_mag * direction.y,
@@ -91,9 +109,9 @@ impl Rider {
         Force { x: self.power / v_x, y: 0.0}
     }
 
-    fn update_velocity(&mut self, dt: f64) {
+    fn update_velocity(&mut self, dt: f64, wind: &Wind) {
         let force_rider = self.calculate_force_rider();
-        let force_drag = self.calculate_force_drag();
+        let force_drag = self.calculate_force_drag(wind);
         let force_total = force_rider + force_drag;
         self.velocity = Velocity {
             x: self.velocity.x + (force_total.x / self.mass) * dt,
@@ -116,10 +134,13 @@ fn main() {
         mass: 80.0,
     }];
     let dt: f64 = 1.0; // seconds
+    let wind = Wind {
+        velocity: Velocity { x: -5.0, y: 0.0 },
+    };
 
     for t in 0..100 {
         for rider in &mut riders {
-            rider.update_velocity(dt);
+            rider.update_velocity(dt, &wind);
             rider.update_position(dt);
         }
         for rider in &riders {
