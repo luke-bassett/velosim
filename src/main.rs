@@ -165,12 +165,15 @@ mod tests {
             cda: 0.3,
             mass: 80.0,
         };
+        let wind = Wind {
+            velocity: Velocity { x: 1.0, y: 0.0 },
+        };
 
         let dt: f64 = 1.0;
         let mut previous_velocity = rider.velocity.x;
 
         for _ in 0..100 {
-            rider.update_velocity(dt);
+            rider.update_velocity(dt, &wind);
             assert!(
                 rider.velocity.x >= previous_velocity,
                 "Velocity decreased! prev: {}, current: {}",
