@@ -1,5 +1,5 @@
 use std::ops::Mul;
-use std::ops::Sub;
+use std::ops::Add;
 use std::f64::EPSILON; // very small number
 
 /// Density of air at sea level [kg / m^3].
@@ -59,13 +59,13 @@ impl Mul<f64> for Force {
     }
 }
 
-impl Sub<Force> for Force {
+impl Add<Force> for Force {
     type Output = Force;
 
-    fn sub(self, other: Force) -> Force {
+    fn add(self, other: Force) -> Force {
         Force {
-            x: self.x - other.x,
-            y: self.y - other.y,
+            x: self.x + other.x,
+            y: self.y + other.y,
         }
     }
 }
@@ -80,7 +80,7 @@ impl Rider {
             y: -1.0 * drag_mag * direction.y,
         }
     }
-    ///
+
     /// Calculates the force created by the rider.
     ///
     /// Handles unrealistic accelleration at low velocity and divide-by-zero at
@@ -97,7 +97,7 @@ impl Rider {
     fn update_velocity(&mut self, dt: f64) {
         let force_rider = self.calculate_force_rider();
         let force_drag = self.calculate_force_drag();
-        let force_total = force_rider - force_drag;
+        let force_total = force_rider + force_drag;
         self.velocity = Velocity {
             x: self.velocity.x + (force_total.x / self.mass) * dt,
             y: self.velocity.y + (force_total.y / self.mass) * dt,
@@ -120,14 +120,14 @@ fn main() {
     }];
     let dt: f64 = 1.0; // seconds
 
-    for t in 0..35 {
+    for t in 0..100 {
         for rider in &mut riders {
             rider.update_velocity(dt);
             rider.update_position(dt);
         }
         for rider in &riders {
             println!(
-                "t {:<5} | v {:>8.3}",
+                "t {:<5} | v {:>8.2}",
                 t, rider.velocity.magnitude()
             )
         }
