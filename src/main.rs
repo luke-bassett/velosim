@@ -86,12 +86,9 @@ impl Rider {
     /// Handles unrealistic accelleration at low velocity and divide-by-zero at
     /// velocity = 0.
     fn calculate_force_rider(&self) -> Force {
-        let force_rider = if self.velocity.x > 0.001 {
-            Force{x: self.power / self.velocity.x, y: 0.0}
-        } else {
-            Force{x: self.power.sqrt(), y: 0.0}
-        };
-        force_rider
+        let min_velocity: f64 = 1.0;
+        let v_x = self.velocity.x.max(min_velocity);
+        Force { x: self.power / v_x, y: 0.0}
     }
 
     fn update_velocity(&mut self, dt: f64) {
