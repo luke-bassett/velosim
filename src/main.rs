@@ -118,8 +118,8 @@ impl Rider {
     /// and mass.
     fn new(power: f64, cda: f64, mass: f64) -> Rider {
         Rider {
-            position: Position { x: 0.0, y: 0.0 },
-            velocity: Velocity { x: 0.0, y: 0.0 },
+            position: Position::new(0.0, 0.0),
+            velocity: Velocity::new(0.0, 0.0),
             power,
             cda,
             mass,
