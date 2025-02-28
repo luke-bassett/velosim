@@ -220,7 +220,7 @@ fn update_rider_position(rider: &mut Rider, dt: f64) {
         current_rider_position.y() + rider.velocity().y() * dt,
     );
 
-    rider.set_position(new_rider_position)
+    rider.set_position(new_rider_position);
 }
 
 fn main() {
