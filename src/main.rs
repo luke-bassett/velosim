@@ -1,7 +1,6 @@
-use std::f64::EPSILON;
-use std::ops::Add;
-use std::ops::Mul;
-use std::ops::Sub; // very small number
+mod vector2d;
+use vector2d::Vector2D;
+
 
 /// Density of air at sea level [kg / m^3].
 const DENSITY_OF_AIR_AT_SEA_LEVEL: f64 = 1.225; // kg/m^3
@@ -29,68 +28,16 @@ struct Velocity {
     x: f64,
     y: f64,
 }
-
-impl Velocity {
-    fn magnitude(&self) -> f64 {
-        (self.x.powi(2) + self.y.powi(2)).sqrt()
-    }
-
-    /// unit vector (direction) of velocity
-    fn unit(&self) -> Velocity {
-        let mag = self.magnitude();
-        if mag < EPSILON {
-            // Avoid divid-by-zero or floating point errors
-            Velocity { x: 0.0, y: 0.0 }
-        } else {
-            Velocity {
-                x: self.x / mag,
-                y: self.y / mag,
-            }
-        }
-    }
-}
-
 struct Force {
     x: f64,
     y: f64,
 }
-
-impl Mul<f64> for Force {
-    type Output = Force;
-
-    fn mul(self, scalar: f64) -> Self::Output {
-        Force {
-            x: self.x * scalar,
-            y: self.y * scalar,
-        }
-    }
-}
-
-impl Add<Force> for Force {
-    type Output = Force;
-
-    fn add(self, other: Force) -> Force {
-        Force {
-            x: self.x + other.x,
-            y: self.y + other.y,
-        }
-    }
-}
-
-impl Sub<Velocity> for Velocity {
-    type Output = Velocity;
-
-    fn sub(self, other: Velocity) -> Velocity {
-        Velocity {
-            x: self.x - other.x,
-            y: self.y - other.y,
-        }
-    }
-}
+impl_vector2d!(Velocity);
+impl_vector2d!(Force);
 
 impl Rider {
     fn calculate_force_drag(&self, wind: &Wind) -> Force {
-        let velocity_relative_to_air = self.velocity - wind.velocity;
+        let velocity_relative_to_air = self.velocity.sub(&wind.velocity);
         let vel_mag = velocity_relative_to_air.magnitude();
         let drag_mag = 0.5 * self.cda * DENSITY_OF_AIR_AT_SEA_LEVEL * vel_mag.powi(2);
         let direction = velocity_relative_to_air.unit();
@@ -116,7 +63,7 @@ impl Rider {
     fn update_velocity(&mut self, dt: f64, wind: &Wind) {
         let force_rider = self.calculate_force_rider();
         let force_drag = self.calculate_force_drag(wind);
-        let force_total = force_rider + force_drag;
+        let force_total = force_rider.add(&force_drag);
         self.velocity = Velocity {
             x: self.velocity.x + (force_total.x / self.mass) * dt,
             y: self.velocity.y + (force_total.y / self.mass) * dt,
