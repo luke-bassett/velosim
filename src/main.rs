@@ -1,7 +1,5 @@
-use std::f64::EPSILON;
-use std::ops::Add;
-use std::ops::Mul;
-use std::ops::Sub; // very small number
+mod vector2d;
+use vector2d::Vector2D;
 
 /// Density of air at sea level [kg / m^3].
 const DENSITY_OF_AIR_AT_SEA_LEVEL: f64 = 1.225; // kg/m^3
@@ -85,7 +83,7 @@ impl Velocity {
     /// unit vector (direction) of velocity
     fn unit(&self) -> Velocity {
         let mag = self.magnitude();
-        if mag < EPSILON {
+        if mag < std::f64::EPSILON {
             // Avoid divid-by-zero or floating point errors
             Velocity::new(0.0, 0.0)
         } else {
@@ -101,39 +99,8 @@ struct Force {
     x: f64,
     y: f64,
 }
-
-impl Mul<f64> for Force {
-    type Output = Force;
-
-    fn mul(self, scalar: f64) -> Self::Output {
-        Force {
-            x: self.x * scalar,
-            y: self.y * scalar,
-        }
-    }
-}
-
-impl Add<Force> for Force {
-    type Output = Force;
-
-    fn add(self, other: Force) -> Force {
-        Force {
-            x: self.x + other.x,
-            y: self.y + other.y,
-        }
-    }
-}
-
-impl Sub<Velocity> for Velocity {
-    type Output = Velocity;
-
-    fn sub(self, other: Velocity) -> Velocity {
-        Velocity {
-            x: self.x - other.x,
-            y: self.y - other.y,
-        }
-    }
-}
+impl_vector2d!(Velocity);
+impl_vector2d!(Force);
 
 /// Represents a rider "system" which includes their kit and bicycle.
 ///
@@ -200,7 +167,7 @@ impl Rider {
 fn calculate_rider_drag(rider: &Rider, wind: &Wind) -> Force {
     let rider_velocity = rider.velocity();
 
-    let velocity_relative_to_air = rider_velocity - wind.velocity();
+    let velocity_relative_to_air = rider_velocity.sub(&wind.velocity());
     let vel_mag = velocity_relative_to_air.magnitude();
     let drag_mag = 0.5 * rider.cda() * DENSITY_OF_AIR_AT_SEA_LEVEL * vel_mag.powi(2);
     let direction = velocity_relative_to_air.unit();
@@ -231,7 +198,7 @@ fn calculate_rider_force(rider: &Rider) -> Force {
 fn update_rider_velocity(rider: &mut Rider, dt: f64, wind: &Wind) {
     let rider_force = calculate_rider_force(rider);
     let drag_force = calculate_rider_drag(rider, wind);
-    let total_force = rider_force + drag_force;
+    let total_force = rider_force.add(&drag_force);
 
     let current_rider_velocity = rider.velocity();
 
