@@ -2,12 +2,10 @@ pub trait Vector2D {
     fn x(&self) -> f64;
     fn y(&self) -> f64;
 
-    #[allow(dead_code)]
     fn magnitude(&self) -> f64 {
         (self.x().powi(2) + self.y().powi(2)).sqrt()
     }
 
-    #[allow(dead_code)]
     fn unit(&self) -> Self
     where
         Self: Sized,

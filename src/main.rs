@@ -1,4 +1,9 @@
+#[macro_use]
 mod vector2d;
+mod physics;
+use physics::Force;
+use physics::Position;
+use physics::Velocity;
 use vector2d::Vector2D;
 
 /// Density of air at sea level [kg / m^3].
@@ -21,91 +26,10 @@ impl Wind {
     }
 }
 
-/// The [Position] of an object in 2d space.
-#[derive(Copy, Clone)]
-struct Position {
-    x: f64,
-    y: f64,
-}
-
-impl Position {
-    /// Create a new [Position] instance with the given x and y components.
-    fn new(x: f64, y: f64) -> Position {
-        Position { x, y }
-    }
-
-    /// Returns the x component of this [Position]
-    fn x(&self) -> f64 {
-        self.x
-    }
-
-    /// Returns the y component of this [Position]
-    fn y(&self) -> f64 {
-        self.y
-    }
-}
-
-/// The [Velocity] of an object in 2d space.
-/// expressed in m/s.
-#[derive(Copy, Clone)]
-struct Velocity {
-    x: f64,
-    y: f64,
-}
-
-impl std::fmt::Display for Velocity {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "({}, {})", self.x, self.y)
-    }
-}
-
-impl Velocity {
-    /// Create a new [Velocity] instance with the given x and y components.
-    fn new(x: f64, y: f64) -> Velocity {
-        Velocity { x, y }
-    }
-
-    /// Returns the x component of this [Velocity]
-    fn x(&self) -> f64 {
-        self.x
-    }
-
-    /// Returns the y component of this [Velocity]
-    fn y(&self) -> f64 {
-        self.y
-    }
-
-    /// Returns the magnitude of this [Velocity].
-    fn magnitude(&self) -> f64 {
-        (self.x.powi(2) + self.y.powi(2)).sqrt()
-    }
-
-    /// unit vector (direction) of velocity
-    fn unit(&self) -> Velocity {
-        let mag = self.magnitude();
-        if mag < f64::EPSILON {
-            // Avoid divid-by-zero or floating point errors
-            Velocity::new(0.0, 0.0)
-        } else {
-            let x = self.x / mag;
-            let y = self.y / mag;
-            Velocity::new(x, y)
-        }
-    }
-}
-
-/// A [Force] in 2d space.
-struct Force {
-    x: f64,
-    y: f64,
-}
-impl_vector2d!(Velocity);
-impl_vector2d!(Force);
-
 /// Represents a rider "system" which includes their kit and bicycle.
 ///
 /// x is the direction of the race, y is perpendicular to the race.
-struct Rider {
+pub struct Rider {
     position: Position, // x, y
     velocity: Velocity, // m/s in x and y
     power: f64,         // W
@@ -171,10 +95,10 @@ fn calculate_rider_drag(rider: &Rider, wind: &Wind) -> Force {
     let vel_mag = velocity_relative_to_air.magnitude();
     let drag_mag = 0.5 * rider.cda() * DENSITY_OF_AIR_AT_SEA_LEVEL * vel_mag.powi(2);
     let direction = velocity_relative_to_air.unit();
-    Force {
-        x: -1.0 * drag_mag * direction.x(),
-        y: -1.0 * drag_mag * direction.y(),
-    }
+    Force::new(
+        -1.0 * drag_mag * direction.x(),
+        -1.0 * drag_mag * direction.y(),
+    )
 }
 
 /// Calculates the [Force] created by the [Rider].
@@ -187,10 +111,7 @@ fn calculate_rider_force(rider: &Rider) -> Force {
     let rider_power = rider.power();
 
     let v_x = rider_velocity.x().max(min_velocity);
-    Force {
-        x: rider_power / v_x,
-        y: 0.0,
-    }
+    Force::new(rider_power / v_x, 0.0)
 }
 
 /// Updates the [Rider]'s velocity based on the forces acting on them, and an
@@ -202,10 +123,10 @@ fn update_rider_velocity(rider: &mut Rider, dt: f64, wind: &Wind) {
 
     let current_rider_velocity = rider.velocity();
 
-    let new_rider_velocity = Velocity {
-        x: current_rider_velocity.x + (total_force.x / rider.mass()) * dt,
-        y: current_rider_velocity.y + (total_force.y / rider.mass()) * dt,
-    };
+    let new_rider_velocity = Velocity::new(
+        current_rider_velocity.x() + (total_force.x() / rider.mass()) * dt,
+        current_rider_velocity.y() + (total_force.y() / rider.mass()) * dt,
+    );
 
     rider.set_velocity(new_rider_velocity);
 }
