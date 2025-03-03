@@ -83,7 +83,7 @@ impl Velocity {
     /// unit vector (direction) of velocity
     fn unit(&self) -> Velocity {
         let mag = self.magnitude();
-        if mag < std::f64::EPSILON {
+        if mag < f64::EPSILON {
             // Avoid divid-by-zero or floating point errors
             Velocity::new(0.0, 0.0)
         } else {
