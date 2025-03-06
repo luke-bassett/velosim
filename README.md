@@ -1,3 +1,4 @@
+[![Rust CI](https://github.com/luke-bassett/velosim/actions/workflows/github-actions.yml/badge.svg)](https://github.com/luke-bassett/velosim/actions/workflows/github-actions.yml)
 🚧 Work in progress 🚧
 
 # VeloSim
