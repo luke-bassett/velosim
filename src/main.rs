@@ -2,29 +2,14 @@
 mod vector2d;
 mod physics;
 mod rider;
+mod wind;
 use physics::Velocity;
 use rider::{update_rider_position, update_rider_velocity, Rider};
 use vector2d::Vector2D;
+use wind::Wind;
 
 /// Density of air at sea level [kg / m^3].
 const DENSITY_OF_AIR_AT_SEA_LEVEL: f64 = 1.225; // kg/m^3
-
-/// Exactly one instance of wind should ever be created for a given simulation.
-pub struct Wind {
-    velocity: Velocity,
-}
-
-impl Wind {
-    /// Create a new instance of [Wind].
-    fn new(velocity: Velocity) -> Wind {
-        Wind { velocity }
-    }
-
-    /// Returns this [Wind]'s [Velocity]
-    fn velocity(&self) -> Velocity {
-        self.velocity
-    }
-}
 
 fn main() {
     let mut riders: Vec<Rider> = vec![Rider::new(300.0, 0.3, 80.0)];
