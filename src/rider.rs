@@ -1,3 +1,5 @@
+use std::sync::atomic::{AtomicU32, Ordering};
+
 use crate::physics::{Force, Position, Velocity};
 use crate::vector2d::Vector2D;
 use crate::Wind;
@@ -7,18 +9,22 @@ use crate::DENSITY_OF_AIR_AT_SEA_LEVEL;
 ///
 /// x is the direction of the race, y is perpendicular to the race.
 pub struct Rider {
-    position: Position, // x, y
-    velocity: Velocity, // m/s in x and y
-    power: f64,         // W
-    cda: f64,           // m^2
-    mass: f64,          // kg
+    pub id: u32,
+    pub position: Position, // x, y
+    velocity: Velocity,     // m/s in x and y
+    power: f64,             // W
+    cda: f64,               // m^2
+    mass: f64,              // kg
 }
+
+static NEXT_RIDER_ID: AtomicU32 = AtomicU32::new(0);
 
 impl Rider {
     /// Create a new [Rider] instance with the given power, drag coefficient,
     /// and mass.
     pub(crate) fn new(power: f64, cda: f64, mass: f64) -> Rider {
         Rider {
+            id: NEXT_RIDER_ID.fetch_add(1, Ordering::Relaxed),
             position: Position::new(0.0, 0.0),
             velocity: Velocity::new(0.0, 0.0),
             power,
