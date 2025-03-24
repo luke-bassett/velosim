@@ -1,4 +1,4 @@
-use crate::rider::{Rider, update_rider_position, update_rider_velocity};
+use crate::rider::{update_rider_position, update_rider_velocity, Rider};
 use crate::wind::Wind;
 
 pub struct Simulation {
@@ -10,7 +10,12 @@ pub struct Simulation {
 
 impl Simulation {
     pub fn new(riders: Vec<Rider>, wind: Wind, dt: f64) -> Self {
-        Simulation { riders, wind, dt, time: 0.0 }
+        Simulation {
+            riders,
+            wind,
+            dt,
+            time: 0.0,
+        }
     }
 
     pub fn tick(&mut self) {
@@ -23,5 +28,16 @@ impl Simulation {
             update_rider_position(rider, self.dt);
         }
         self.time += self.dt;
+    }
+
+    pub fn print_rider_positions(&self) {
+        for rider in &self.riders {
+            println!(
+                "Rider {} is at ({}, {})",
+                rider.id,
+                rider.position.x(),
+                rider.position.y()
+            );
+        }
     }
 }
