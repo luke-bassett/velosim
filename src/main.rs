@@ -3,6 +3,7 @@ mod vector2d;
 mod physics;
 mod rider;
 mod wind;
+mod simulation;
 use physics::Velocity;
 use rider::{update_rider_position, update_rider_velocity, Rider};
 use vector2d::Vector2D;
