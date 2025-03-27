@@ -71,10 +71,7 @@ mod tests {
 
     #[test]
     fn test_multiple_riders() {
-        let riders = vec![
-            Rider::new(100.0, 0.5, 70.0),
-            Rider::new(120.0, 0.4, 75.0),
-        ];
+        let riders = vec![Rider::new(100.0, 0.5, 70.0), Rider::new(120.0, 0.4, 75.0)];
         let wind = Wind::new(Velocity::new(0.0, 0.0));
         let dt = 1.0;
         let mut sim = Simulation::new(riders, wind, dt);
