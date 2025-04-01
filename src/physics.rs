@@ -81,3 +81,35 @@ impl Force {
         self.y
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_position_creation() {
+        let pos = Position::new(1.0, 2.0);
+        assert_eq!(pos.x(), 1.0);
+        assert_eq!(pos.y(), 2.0);
+    }
+
+    #[test]
+    fn test_velocity_creation() {
+        let vel = Velocity::new(3.0, 4.0);
+        assert_eq!(vel.x(), 3.0);
+        assert_eq!(vel.y(), 4.0);
+    }
+
+    #[test]
+    fn test_force_creation() {
+        let force = Force::new(5.0, 6.0);
+        assert_eq!(force.x(), 5.0);
+        assert_eq!(force.y(), 6.0);
+    }
+
+    #[test]
+    fn test_velocity_display() {
+        let vel = Velocity::new(1.0, 2.0);
+        assert_eq!(format!("{}", vel), "(1, 2)");
+    }
+}

@@ -126,3 +126,65 @@ pub fn update_rider_position(rider: &mut Rider, dt: f64) {
 
     rider.set_position(new_rider_position);
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_rider_creation() {
+        let rider = Rider::new(250.0, 0.3, 75.0);
+        assert_eq!(rider.power(), 250.0);
+        assert_eq!(rider.cda(), 0.3);
+        assert_eq!(rider.mass(), 75.0);
+        assert_eq!(rider.position().x(), 0.0);
+        assert_eq!(rider.position().y(), 0.0);
+        assert_eq!(rider.velocity().x(), 0.0);
+        assert_eq!(rider.velocity().y(), 0.0);
+    }
+
+    #[test]
+    fn test_rider_id_increment() {
+        let rider1 = Rider::new(250.0, 0.3, 75.0);
+        let rider2 = Rider::new(250.0, 0.3, 75.0);
+        assert_eq!(rider2.id, rider1.id + 1);
+    }
+
+    #[test]
+    fn test_rider_position_update() {
+        let mut rider = Rider::new(250.0, 0.3, 75.0);
+        rider.set_velocity(Velocity::new(10.0, 0.0));
+        update_rider_position(&mut rider, 1.0);
+        assert_eq!(rider.position().x(), 10.0);
+        assert_eq!(rider.position().y(), 0.0);
+    }
+
+    #[test]
+    fn test_rider_velocity_update() {
+        let mut rider = Rider::new(250.0, 0.3, 75.0);
+        let wind = Wind::new(Velocity::new(0.0, 0.0));
+        update_rider_velocity(&mut rider, 1.0, &wind);
+        // With 250W power and 75kg mass, initial acceleration should be ~3.33 m/s²
+        assert!(rider.velocity().x() > 0.0);
+    }
+
+    #[test]
+    fn test_rider_drag_calculation() {
+        let mut rider = Rider::new(250.0, 0.3, 75.0);
+        rider.set_velocity(Velocity::new(10.0, 0.0));
+        let wind = Wind::new(Velocity::new(0.0, 0.0));
+        let drag = calculate_rider_drag(&rider, &wind);
+        // Drag should be negative (opposing motion)
+        assert!(drag.x() < 0.0);
+        assert_eq!(drag.y(), 0.0);
+    }
+
+    #[test]
+    fn test_rider_force_at_zero_velocity() {
+        let rider = Rider::new(250.0, 0.3, 75.0);
+        let force = calculate_rider_force(&rider);
+        // Should use minimum velocity of 1.0 m/s
+        assert_eq!(force.x(), 250.0);
+        assert_eq!(force.y(), 0.0);
+    }
+}
