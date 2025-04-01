@@ -22,6 +22,7 @@ fn main() {
     let wind = Wind::new(Velocity::new(-5.0, 1.0));
     let mut simulation = Simulation::new(riders, wind, dt);
 
+    simulation.print_rider_positions();
     for _ in 0..10 {
         simulation.tick();
         simulation.print_rider_positions();
